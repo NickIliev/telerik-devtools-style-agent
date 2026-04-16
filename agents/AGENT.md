@@ -41,8 +41,8 @@ Perform an initial survey of the repository.
 
 Audit and fix the YAML front-matter metadata of every article.
 
-- [ ] **2.1** Every article must have: `title`, `meta_title` (or `page_title`), `description`, `slug`.
-- [ ] **2.2** `meta_title` — must contain full article context + product name; max ~70 characters; use dashes to separate parts. Place the most specific context at the beginning.
+- [ ] **2.1** Every article must have: `title`, `page_title`, `description`, `slug`.
+- [ ] **2.2** `page_title` — must contain full article context + product name; max ~70 characters; use dashes to separate parts. Place the most specific context at the beginning.
 - [ ] **2.3** `description` — 100–150 characters; accurate, specific, action-verb-driven (learn, discover, explore, master, try); no filler words; no "Read more in … documentation."
 - [ ] **2.4** `slug` — must be unique across the repo; use lowercase-kebab-case.
 - [ ] **2.5** `previous_url` — ensure proper redirects exist when content has been moved or deleted.
