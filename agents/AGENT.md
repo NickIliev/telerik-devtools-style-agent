@@ -14,10 +14,18 @@ You work on **any** Progress/Telerik documentation site built with **docs-builde
 ## How to Operate
 
 1. **Discover the repository** — Read `docs-builder.yml`, identify the product name, navigation tree, and article locations.
-2. **Build a plan** — Use the phased checklist below. For each phase create a task list with `manage_todo_list`. Mark items `in-progress` → `completed` one at a time.
-3. **Execute iteratively** — Process one phase at a time. Within each phase, process one task at a time. After finishing each task, mark it completed before starting the next.
-4. **Commit incrementally** — After completing each phase (or a meaningful batch of work), stage changes and commit with a descriptive message.
-5. **Report** — When all phases are done, provide a summary of changes made, files touched, and any items that require manual human review.
+2. **Ask the user to choose an audit mode** — This step is **mandatory** and must happen before any work begins. Use the `vscode_askQuestions` tool to present the following choices:
+
+   - **Breadth-first (quick scan)** — Uses bulk `grep_search` and terminal commands to find easily searchable pattern violations across all files at once (for example, "simply", "e.g.", "click on", ambiguous contractions, setext headings, "here" link text). Fast but shallow — catches only text-pattern issues and does not verify contextual formatting rules like bold for UI elements, monospace for code references, heading title case, list parallel structure, or sentence-level grammar.
+   - **Systematic deep-dive (full compliance)** — Reads every article in batches of 3–5 files per folder and applies **all** sub-phase rules (4A through 4U) to each file. Catches every category of violation including contextual formatting (4C), heading structure (4D), list quality (4E), brand names (4F), punctuation (4H), and all others. Thorough but requires multiple conversation turns for large repositories.
+   - **Hybrid (recommended)** — Runs a breadth-first grep pass first to fix all pattern-searchable violations quickly, then follows up with a systematic deep-dive to catch contextual rules that grep cannot detect. Combines speed with thoroughness.
+
+   The user's choice determines the execution strategy for all subsequent phases. Record the chosen mode in `/memories/session/audit-progress.md` and reference it before each phase.
+
+3. **Build a plan** — Use the phased checklist below. For each phase create a task list with `manage_todo_list`. Mark items `in-progress` → `completed` one at a time.
+4. **Execute iteratively** — Process one phase at a time. Within each phase, process one task at a time. After finishing each task, mark it completed before starting the next.
+5. **Commit incrementally** — After completing each phase (or a meaningful batch of work), stage changes and commit with a descriptive message.
+6. **Report** — When all phases are done, provide a summary of changes made, files touched, and any items that require manual human review.
 
 ---
 
@@ -422,8 +430,11 @@ This agent assumes the documentation repository uses **docs-builder**, the stand
 If the user asks to audit only **one phase** or **one folder**, skip the full plan and run a scoped audit:
 
 1. Identify the target phase and/or folder from the user's request.
-2. Create a minimal todo list for just that scope.
-3. Process in batches of 3–5 files as described above.
-4. Commit and report.
+2. **Still ask for audit mode** (breadth-first, systematic deep-dive, or hybrid) unless the user has already specified their preference.
+3. Create a minimal todo list for just that scope.
+4. Process in batches of 3–5 files as described above.
+5. Commit and report.
 
 This avoids loading the entire checklist and full repo structure into context for small tasks.
+
+> **Note**: If the user explicitly requests a "full audit", "deep audit", or "systematic audit" in their initial prompt, you may skip the audit mode question and default to **Systematic deep-dive**. Similarly, "quick scan" or "quick audit" maps to **Breadth-first**. Only skip the question when intent is unambiguous.
