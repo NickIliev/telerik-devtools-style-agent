@@ -264,7 +264,7 @@ This is the core phase. Apply every rule from the full style guide.
 - [ ] **4J.1** Cross-link articles. Use descriptive keywords in anchor text — never "go here", "click this link", "this article".
 - [ ] **4J.2** Clearly identify the purpose of the linked content in the anchor text.
 - [ ] **4J.3** Do not quote internal article titles exactly (they may change). Paraphrase instead.
-- [ ] **4J.4** External links: open in new tab (`target="_blank"`).
+- [ ] **4J.4** External links: docs-builder automatically opens external links in a new tab — do not manually add `target="_blank"` to links.
 - [ ] **4J.5** Vary link text across documents for the same target to avoid spam detectors.
 - [ ] **4J.6** When citing external blog posts, cite the exact name and author.
 
