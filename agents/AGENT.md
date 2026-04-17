@@ -21,17 +21,66 @@ You work on **any** Progress/Telerik documentation site built with **docs-builde
 
 ---
 
+## Context Management (CRITICAL)
+
+Large documentation repositories will exceed context limits if processed naively. Follow these rules strictly to prevent context overflow errors:
+
+### Batching Rules
+
+- **NEVER read all articles at once.** Always work in small batches grouped by folder (for example, all files in `configure-fiddler/`, then all files in `extend-fiddler/`, and so on).
+- **Maximum batch size: 5 files.** Read, audit, and fix at most 5 articles before committing and moving to the next batch.
+- **One phase per conversation turn when possible.** If the user invokes you for "full audit", complete Phase 1 first, report progress, then proceed to Phase 2, and so on. If a phase is too large for one turn, split it into folder-based batches.
+- **Finish and release before loading more.** Complete all edits for the current batch, commit changes, then move to the next batch. Do not hold unprocessed file contents in context.
+
+### Session Memory for Progress Tracking
+
+Use session memory (`/memories/session/`) to persist progress across conversation turns and batches:
+
+1. **Before starting any phase**, create or update a session file (for example, `/memories/session/audit-progress.md`) listing:
+   - Current phase and sub-task.
+   - Folders already completed.
+   - Folders remaining.
+   - Summary of issues found and fixes applied per batch.
+2. **After completing each batch**, update the session file with what was done.
+3. **At the start of each new turn**, read the session file to resume where you left off without re-reading already-processed files.
+
+### Subagent Delegation
+
+- For **read-only audit scans** (for example, "list all files missing `description` metadata"), delegate to the `Explore` subagent to keep the main agent context clean. Collect only the summary results.
+- For **per-file edits**, do the work in the main agent but limit to the current batch of files.
+
+### Prioritization When Context Is Tight
+
+If you detect that context is growing large mid-phase:
+
+1. Commit the current batch of changes immediately.
+2. Update the session memory with progress.
+3. Report what was completed and what remains.
+4. Continue with the next batch in a fresh state.
+
+### Rules-on-Demand Loading
+
+The full style guide rules are listed in Phase 4 below for reference. When working on a specific sub-phase (for example, 4A — Tone and Voice), focus only on that sub-phase's rules. Do NOT try to apply all of Phase 4's rules to all files in a single pass. Instead:
+
+1. Pick one sub-phase (for example, 4C — Formatting).
+2. Process one folder-batch of files (max 5) against that sub-phase's rules.
+3. Commit. Move to the next folder-batch or sub-phase.
+
+---
+
 ## Phase 1 — Housekeeping & Repository Audit
 
-Perform an initial survey of the repository.
+Perform an initial survey of the repository. This phase is lightweight and can run in one pass.
+
+> **Batching**: Use the `Explore` subagent or terminal commands (`find`, `grep`) for bulk scans instead of reading every file into context. Store results in session memory.
 
 - [ ] **1.1** Read `docs-builder.yml` to understand the navigation tree and section structure.
-- [ ] **1.2** List all Markdown articles and count them.
+- [ ] **1.2** List all Markdown articles by folder and count them. Save the folder list to `/memories/session/audit-progress.md` — this list drives all subsequent batch processing.
 - [ ] **1.3** Identify the product name and any brand-name variables used in the repo.
-- [ ] **1.4** Check for orphaned files (files not referenced in navigation or by any slug).
-- [ ] **1.5** Check for broken internal `slug://` links.
-- [ ] **1.6** Check for broken relative-path image references.
-- [ ] **1.7** Verify that every article has a YAML front-matter block.
+- [ ] **1.4** Check for orphaned files (files not referenced in navigation or by any slug). Use `grep` or the `Explore` subagent — do not read file contents.
+- [ ] **1.5** Check for broken internal `slug://` links. Use `grep_search` to find all `slug://` references, then cross-check against known slugs.
+- [ ] **1.6** Check for broken relative-path image references. Use `grep_search` for image patterns and validate paths with `file_search`.
+- [ ] **1.7** Verify that every article has a YAML front-matter block. Use a terminal command (`head -5 <file>`) or `grep` for `^---` to check without reading full files.
 
 ---
 
@@ -41,19 +90,28 @@ Perform an initial survey of the repository.
 
 Audit and fix the YAML front-matter metadata of every article.
 
+> **Batching**: Process metadata **one folder at a time** (for example, all `.md` files in `configure-fiddler/`, then `extend-fiddler/`, etc.). For each folder:
+> 1. Read only the front-matter block (first 15–20 lines) of each file in the folder — do NOT read the full article body.
+> 2. Check and fix all metadata rules (2.1–2.7) for those files.
+> 3. Commit the folder batch.
+> 4. Update `/memories/session/audit-progress.md` with the completed folder.
+> 5. Move to the next folder.
+
 - [ ] **2.1** Every article must have: `title`, `page_title`, `description`, `slug`.
 - [ ] **2.2** `page_title` — must contain full article context + product name; max ~70 characters; use dashes to separate parts. Place the most specific context at the beginning.
 - [ ] **2.3** `description` — 100–150 characters; accurate, specific, action-verb-driven (learn, discover, explore, master, try); no filler words; no "Read more in … documentation."
 - [ ] **2.4** `slug` — must be unique across the repo; use lowercase-kebab-case.
 - [ ] **2.5** `previous_url` — ensure proper redirects exist when content has been moved or deleted.
 - [ ] **2.6** `position` — verify ordering is consistent within each navigation section.
-- [ ] **2.7** Verify `title` matches the level-one heading (`#`) of the article.
+- [ ] **2.7** Verify `title` matches the level-one heading (`#`) of the article. Read only enough of the article body to find the `#` heading (typically within the first 25 lines).
 
 ---
 
 ## Phase 3 — Deep Per-Article Content Audit
 
 Read every article and audit for completeness, structure, and accuracy.
+
+> **Batching**: This phase requires reading full article bodies. Process **at most 3–5 articles per batch**. Group by folder. After each batch, commit edits and update session memory before loading the next batch.
 
 - [ ] **3.1** Every article starts with a short introduction (1–2 sentences): overview of the feature, what the article describes, and the business need it solves.
 - [ ] **3.2** Articles are short and well-organized; attention span < 7 seconds rule.
@@ -68,6 +126,20 @@ Read every article and audit for completeness, structure, and accuracy.
 ## Phase 4 — Style Guide Compliance (Language & Formatting)
 
 This is the core phase. Apply every rule from the full style guide.
+
+> **CRITICAL Batching Strategy — Two-Dimensional Chunking**:
+>
+> Phase 4 has many sub-phases (4A through 4U) and the repo has many files. Applying all sub-phases to all files at once will exceed context limits. Use this approach:
+>
+> 1. **Outer loop: iterate by folder.** Pick one folder (for example, `configure-fiddler/`).
+> 2. **Inner loop: iterate by file batch.** Read 3–5 files from that folder.
+> 3. **Apply ALL applicable sub-phase rules (4A–4U) to those 3–5 files**, then commit.
+> 4. **Move to the next batch** in the same folder, or the next folder.
+> 5. **Update session memory** after each batch with: folder name, files processed, issues found and fixed.
+>
+> This means you do one pass per file (applying all rules), not one pass per rule (reading all files). This minimizes re-reading.
+>
+> **If a single article is very long** (> 200 lines), process it alone in its own batch.
 
 ### 4A — Tone and Voice
 > Source: <https://www.telerik.com/documentation/style-guide/tone-and-voice>
@@ -278,6 +350,8 @@ This is the core phase. Apply every rule from the full style guide.
 
 Final pass across all articles for consistency.
 
+> **Batching**: Many of these checks can be done with targeted `grep_search` or terminal commands without reading full files. Use bulk search tools first, then open only the files that need fixes, in batches of 5. Delegate read-only scans to the `Explore` subagent when possible.
+
 - [ ] **5.1** Consistent use of product brand name (first occurrence full, subsequent short).
 - [ ] **5.2** Consistent heading capitalization across all articles.
 - [ ] **5.3** Consistent list formatting (punctuation, parallel structure).
@@ -293,8 +367,10 @@ Final pass across all articles for consistency.
 
 ## Phase 6 — Reporting
 
+> **Context note**: Build the final report from `/memories/session/audit-progress.md` rather than re-reading all files. The session memory should already contain per-batch summaries from Phases 1–5.
+
 - [ ] **6.1** Generate a summary of all changes: files modified, rules applied, items requiring manual review.
-- [ ] **6.2** List any items that cannot be automated (e.g., screenshot replacement, factual accuracy verification).
+- [ ] **6.2** List any items that cannot be automated (for example, screenshot replacement, factual accuracy verification).
 - [ ] **6.3** Provide a diff summary suitable for a pull request description.
 
 ---
@@ -338,3 +414,16 @@ This agent assumes the documentation repository uses **docs-builder**, the stand
 - **Front-matter**: YAML block delimited by `---` at the top of each `.md` file.
 - **Metadata entries**: `title`, `meta_title` (or `page_title` for older platforms), `description`, `slug`, `position`, `tags`, `previous_url`.
 - **Notes syntax**: Uses `> [!NOTE]`, `> [!TIP]`, `> [!IMPORTANT]` or `>note`, `>tip`, `>caution` prefixes depending on the specific docs-builder version.
+
+---
+
+## Quick-Start: Running a Targeted Audit
+
+If the user asks to audit only **one phase** or **one folder**, skip the full plan and run a scoped audit:
+
+1. Identify the target phase and/or folder from the user's request.
+2. Create a minimal todo list for just that scope.
+3. Process in batches of 3–5 files as described above.
+4. Commit and report.
+
+This avoids loading the entire checklist and full repo structure into context for small tasks.
