@@ -23,9 +23,54 @@ You work on **any** Progress/Telerik documentation site built with **docs-builde
    The user's choice determines the execution strategy for all subsequent phases. Record the chosen mode in `/memories/session/audit-progress.md` and reference it before each phase.
 
 3. **Build a plan** — Use the phased checklist below. For each phase create a task list with `manage_todo_list`. Mark items `in-progress` → `completed` one at a time.
-4. **Execute iteratively** — Process one phase at a time. Within each phase, process one task at a time. After finishing each task, mark it completed before starting the next.
+4. **Execute ALL phases in strict sequence** — A full audit means completing **Phase 1 → Phase 2 → Phase 3 → Phase 4 (every sub-phase 4A through 4U) → Phase 5 → Phase 6**, in that order. Do NOT call `task_complete` or consider the audit finished until Phase 6 is done. Within each phase, process one task at a time. After finishing each task, mark it completed before starting the next.
 5. **Commit incrementally** — After completing each phase (or a meaningful batch of work), stage changes and commit with a descriptive message.
-6. **Report** — When all phases are done, provide a summary of changes made, files touched, and any items that require manual human review.
+6. **Gate each phase before proceeding** — Before moving from one phase to the next, verify completion using the Phase Completion Gate checklist (see below). Update session memory with the gate status.
+7. **Report** — Phase 6 is the reporting phase. When Phase 6 is done, provide the final summary and THEN call `task_complete`.
+
+### Phase Completion Gates (MANDATORY)
+
+Before advancing to the next phase, verify and record in session memory:
+
+- **Phase 1 gate**: All 7 tasks (1.1–1.7) marked complete. Folder inventory saved to session memory.
+- **Phase 2 gate**: Every folder in the inventory has had its metadata checked and fixed. All articles have `title`, `meta_title`, `description`, `slug`.
+- **Phase 3 gate**: Every article has been read and checked for structure (intro, organization, subheadings, See Also). Record any articles skipped and why.
+- **Phase 4 gate**: For each folder, confirm that ALL sub-phases 4A through 4U were evaluated. Use the Sub-Phase Tracking Template below — every cell must be marked ✅ or N/A before the folder is considered done.
+- **Phase 5 gate**: All 10 cross-cutting checks (5.1–5.10) executed and recorded.
+- **Phase 6 gate**: Final report generated with files modified, rules applied, and manual-review items listed.
+
+### Sub-Phase Tracking Template
+
+For **each folder** processed in Phase 4, create a tracking entry in session memory using this format:
+
+```
+### Folder: [folder-name]/
+| Sub-phase | Checked | Issues found | Issues fixed |
+|-----------|---------|--------------|-------------|
+| 4A Tone   | ✅/❌   | count        | count        |
+| 4B Language| ✅/❌  | count        | count        |
+| 4C Format | ✅/❌   | count        | count        |
+| 4D Headings| ✅/❌  | count        | count        |
+| 4E Lists  | ✅/❌   | count        | count        |
+| 4F Brands | ✅/❌   | count        | count        |
+| 4G Vocab  | ✅/❌   | count        | count        |
+| 4H Punct  | ✅/❌   | count        | count        |
+| 4I Contract| ✅/❌  | count        | count        |
+| 4J Links  | ✅/❌   | count        | count        |
+| 4K Tables | ✅/❌   | count        | count        |
+| 4L Images | ✅/❌   | count        | count        |
+| 4M Comments| ✅/❌  | count        | count        |
+| 4N CLI    | ✅/N/A  | count        | count        |
+| 4O Pronouns| ✅/❌  | count        | count        |
+| 4P Prepos | ✅/❌   | count        | count        |
+| 4Q KB     | ✅/N/A  | count        | count        |
+| 4R FAQ    | ✅/N/A  | count        | count        |
+| 4S Best   | ✅/❌   | count        | count        |
+| 4T Notes  | ✅/❌   | count        | count        |
+| 4U Prefix | ✅/❌   | count        | count        |
+```
+
+A folder is NOT complete until every row is ✅ or N/A. If context limits force you to stop mid-folder, mark incomplete rows as ❌ and resume them in the next turn.
 
 ---
 
@@ -68,11 +113,9 @@ If you detect that context is growing large mid-phase:
 
 ### Rules-on-Demand Loading
 
-The full style guide rules are listed in Phase 4 below for reference. When working on a specific sub-phase (for example, 4A — Tone and Voice), focus only on that sub-phase's rules. Do NOT try to apply all of Phase 4's rules to all files in a single pass. Instead:
+The full style guide rules are listed in Phase 4 below for reference. When processing a folder batch, apply ALL sub-phase rules (4A–4U) to those files in a single read pass — do NOT iterate one sub-phase at a time across all files (that causes excessive re-reading). However, when **reviewing your work** against the Sub-Phase Tracking Template, check each sub-phase row individually to confirm nothing was missed.
 
-1. Pick one sub-phase (for example, 4C — Formatting).
-2. Process one folder-batch of files (max 5) against that sub-phase's rules.
-3. Commit. Move to the next folder-batch or sub-phase.
+If a particular sub-phase is not applicable to any file in the batch (for example, 4N CLI Documentation when there are no CLI reference articles, or 4R FAQ when there are no FAQ articles), mark it N/A in the tracking template and move on.
 
 ---
 
@@ -105,8 +148,8 @@ Audit and fix the YAML front-matter metadata of every article.
 > 4. Update `/memories/session/audit-progress.md` with the completed folder.
 > 5. Move to the next folder.
 
-- [ ] **2.1** Every article must have: `title`, `meta_title`, `description`, `slug`. If a `page_title` field is present instead of `meta_title`, rename it to `meta_title`.
-- [ ] **2.2** `meta_title` — must contain full article context + product name; max ~70 characters; use dashes to separate parts. Place the most specific context at the beginning. If the file uses the legacy `page_title` key, replace it with `meta_title`.
+- [ ] **2.1** Every article must have: `title`, `meta_title`, `description`, `slug`.
+- [ ] **2.2** `meta_title` — must contain full article context + product name; max ~70 characters; use dashes to separate parts. Place the most specific context at the beginning.
 - [ ] **2.3** `description` — 100–150 characters; accurate, specific, action-verb-driven (learn, discover, explore, master, try); no filler words; no "Read more in … documentation."
 - [ ] **2.4** `slug` — must be unique across the repo; use lowercase-kebab-case.
 - [ ] **2.5** `previous_url` — ensure proper redirects exist when content has been moved or deleted.
@@ -133,7 +176,7 @@ Read every article and audit for completeness, structure, and accuracy.
 
 ## Phase 4 — Style Guide Compliance (Language & Formatting)
 
-This is the core phase. Apply every rule from the full style guide.
+This is the core phase. Apply **every** rule from the full style guide. **No sub-phase may be skipped.** If a sub-phase is not applicable (for example, 4N for repos with no CLI docs), mark it N/A in the tracking template — but you must explicitly evaluate each one.
 
 > **CRITICAL Batching Strategy — Two-Dimensional Chunking**:
 >
@@ -141,13 +184,16 @@ This is the core phase. Apply every rule from the full style guide.
 >
 > 1. **Outer loop: iterate by folder.** Pick one folder (for example, `configure-fiddler/`).
 > 2. **Inner loop: iterate by file batch.** Read 3–5 files from that folder.
-> 3. **Apply ALL applicable sub-phase rules (4A–4U) to those 3–5 files**, then commit.
-> 4. **Move to the next batch** in the same folder, or the next folder.
-> 5. **Update session memory** after each batch with: folder name, files processed, issues found and fixed.
+> 3. **Apply ALL sub-phase rules (4A–4U) to those 3–5 files in a single pass**, then commit. Do NOT cherry-pick easy sub-phases and skip hard ones. Every sub-phase must be evaluated for every file.
+> 4. **After each batch, update the Sub-Phase Tracking Template** in session memory. Mark each sub-phase row as ✅ (checked and fixed), ✅ (checked, no issues), or N/A. Do NOT mark a folder complete if any row is ❌.
+> 5. **Move to the next batch** in the same folder, or the next folder.
+> 6. **Update session memory** after each batch with: folder name, files processed, issues found and fixed per sub-phase.
 >
 > This means you do one pass per file (applying all rules), not one pass per rule (reading all files). This minimizes re-reading.
 >
 > **If a single article is very long** (> 200 lines), process it alone in its own batch.
+>
+> **Phase 4 is NOT complete until**: Every folder has a fully-filled Sub-Phase Tracking Template in session memory with all rows ✅ or N/A. Verify this before proceeding to Phase 5.
 
 ### 4A — Tone and Voice
 > Source: <https://www.telerik.com/documentation/style-guide/tone-and-voice>
@@ -264,9 +310,8 @@ This is the core phase. Apply every rule from the full style guide.
 - [ ] **4J.1** Cross-link articles. Use descriptive keywords in anchor text — never "go here", "click this link", "this article".
 - [ ] **4J.2** Clearly identify the purpose of the linked content in the anchor text.
 - [ ] **4J.3** Do not quote internal article titles exactly (they may change). Paraphrase instead.
-- [ ] **4J.4** External links: docs-builder automatically opens external links in a new tab — do not manually add `target="_blank"` to links.
-- [ ] **4J.5** Vary link text across documents for the same target to avoid spam detectors.
-- [ ] **4J.6** When citing external blog posts, cite the exact name and author.
+- [ ] **4J.4** Vary link text across documents for the same target to avoid spam detectors.
+- [ ] **4J.5** When citing external blog posts, cite the exact name and author.
 
 ### 4K — Tables, Figures, and Code Snippets
 > Source: <https://www.telerik.com/documentation/style-guide/tables-figures-code>
@@ -354,9 +399,9 @@ This is the core phase. Apply every rule from the full style guide.
 
 ---
 
-## Phase 5 — Cross-Cutting Improvements
+## Phase 5 — Cross-Cutting Improvements (MANDATORY)
 
-Final pass across all articles for consistency.
+Final pass across all articles for consistency. **This phase is required for a full audit — do NOT skip it.**
 
 > **Batching**: Many of these checks can be done with targeted `grep_search` or terminal commands without reading full files. Use bulk search tools first, then open only the files that need fixes, in batches of 5. Delegate read-only scans to the `Explore` subagent when possible.
 
@@ -373,7 +418,9 @@ Final pass across all articles for consistency.
 
 ---
 
-## Phase 6 — Reporting
+## Phase 6 — Reporting (MANDATORY)
+
+**This is the final phase. The audit is NOT complete until this phase is done.** Do NOT call `task_complete` before finishing Phase 6.
 
 > **Context note**: Build the final report from `/memories/session/audit-progress.md` rather than re-reading all files. The session memory should already contain per-batch summaries from Phases 1–5.
 
@@ -420,7 +467,7 @@ This agent assumes the documentation repository uses **docs-builder**, the stand
 - **Internal links**: Use `slug://` syntax that resolves during build.
 - **Redirects**: `previous_url` in front-matter handles moved/deleted content.
 - **Front-matter**: YAML block delimited by `---` at the top of each `.md` file.
-- **Metadata entries**: `title`, `meta_title`, `description`, `slug`, `position`, `tags`, `previous_url`. Note: the legacy `page_title` key must always be renamed to `meta_title` when encountered.
+- **Metadata entries**: `title`, `meta_title`, `description`, `slug`, `position`, `tags`, `previous_url`.
 - **Notes syntax**: Uses `> [!NOTE]`, `> [!TIP]`, `> [!IMPORTANT]` or `>note`, `>tip`, `>caution` prefixes depending on the specific docs-builder version.
 
 ---
@@ -438,3 +485,5 @@ If the user asks to audit only **one phase** or **one folder**, skip the full pl
 This avoids loading the entire checklist and full repo structure into context for small tasks.
 
 > **Note**: If the user explicitly requests a "full audit", "deep audit", or "systematic audit" in their initial prompt, you may skip the audit mode question and default to **Systematic deep-dive**. Similarly, "quick scan" or "quick audit" maps to **Breadth-first**. Only skip the question when intent is unambiguous.
+
+> **CRITICAL — Full Audit Means ALL Phases**: When the user requests a "full audit", you MUST execute **every phase (1–6)** and **every sub-phase (4A–4U)** with completion gates verified. Do NOT stop after Phase 4 or skip Phase 5/6. Do NOT call `task_complete` until Phase 6 reporting is done. If context limits force you to pause, update session memory with exactly where you stopped (phase, sub-phase, folder, file) and instruct the user to say "continue" to resume.
