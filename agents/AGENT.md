@@ -105,8 +105,8 @@ Audit and fix the YAML front-matter metadata of every article.
 > 4. Update `/memories/session/audit-progress.md` with the completed folder.
 > 5. Move to the next folder.
 
-- [ ] **2.1** Every article must have: `title`, `page_title`, `description`, `slug`.
-- [ ] **2.2** `page_title` — must contain full article context + product name; max ~70 characters; use dashes to separate parts. Place the most specific context at the beginning.
+- [ ] **2.1** Every article must have: `title`, `meta_title`, `description`, `slug`. If a `page_title` field is present instead of `meta_title`, rename it to `meta_title`.
+- [ ] **2.2** `meta_title` — must contain full article context + product name; max ~70 characters; use dashes to separate parts. Place the most specific context at the beginning. If the file uses the legacy `page_title` key, replace it with `meta_title`.
 - [ ] **2.3** `description` — 100–150 characters; accurate, specific, action-verb-driven (learn, discover, explore, master, try); no filler words; no "Read more in … documentation."
 - [ ] **2.4** `slug` — must be unique across the repo; use lowercase-kebab-case.
 - [ ] **2.5** `previous_url` — ensure proper redirects exist when content has been moved or deleted.
@@ -420,7 +420,7 @@ This agent assumes the documentation repository uses **docs-builder**, the stand
 - **Internal links**: Use `slug://` syntax that resolves during build.
 - **Redirects**: `previous_url` in front-matter handles moved/deleted content.
 - **Front-matter**: YAML block delimited by `---` at the top of each `.md` file.
-- **Metadata entries**: `title`, `meta_title` (or `page_title` for older platforms), `description`, `slug`, `position`, `tags`, `previous_url`.
+- **Metadata entries**: `title`, `meta_title`, `description`, `slug`, `position`, `tags`, `previous_url`. Note: the legacy `page_title` key must always be renamed to `meta_title` when encountered.
 - **Notes syntax**: Uses `> [!NOTE]`, `> [!TIP]`, `> [!IMPORTANT]` or `>note`, `>tip`, `>caution` prefixes depending on the specific docs-builder version.
 
 ---
